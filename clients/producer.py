@@ -1,41 +1,45 @@
+import json
 import logging
+import os
 import random
+import string
 import time
 
-import confluent_kafka
 import confluent_kafka as kafka
-from confluent_kafka.serialization import SerializationError
+import dotenv
 
-from common import fake_message
-
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+dotenv.load_dotenv()
+
 CONFIG = {
-    'bootstrap.servers': 'localhost:9094',
-    'acks': 'all',  # ждем подтверждение от всех синхронизированных в данный момент реплик
-    'retries': 3,  # 3 попытки отправки при ошибках
+    'bootstrap.servers': os.environ['BROKER'],
+    'acks': os.environ['ACKS'],
+    'retries': int(os.environ['RETRIES']),
 }
-TOPIC_NAME = 'topic-1'
-QUEUE_FULL_TIMEOUT = 5  # время ожидания в случае заполненности очереди продюсера (секунды)
+TOPIC_NAME = os.environ['TOPIC_MESSAGES_IN']
+QUEUE_FULL_TIMEOUT = os.environ.get('QUEUE_FULL_TIMEOUT', 0)
 
 producer = kafka.Producer(CONFIG)
 
+
+def fake_message(length: int) -> bytes:
+    body = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    message = {'sender': {'username': 'from'}, 'receiver': {'username': 'to'}, 'message': body}
+    return json.dumps(message).encode()
+
+
 while True:
     message = fake_message(random.randint(3, 10))
-    print(message)
+    logger.info(message)
 
     try:
-        raw = message.serialize()
-    except SerializationError as error:
-        logger.error('Message serialization error, msg: %s, error: %s', message, error)
-        continue
-
-    try:
-        producer.produce(topic=TOPIC_NAME, value=raw)
+        producer.produce(topic=TOPIC_NAME, value=message)
     except BufferError as error:
         logger.error('Internal producer message queue is full, error: %s', error)
         time.sleep(QUEUE_FULL_TIMEOUT)
-    except confluent_kafka.KafkaException as error:
+    except kafka.KafkaException as error:
         logger.error('Something went wrong, message:%s, error: %s', message, error)
         raise
 
