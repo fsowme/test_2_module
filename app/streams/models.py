@@ -13,3 +13,8 @@ class Message(faust.Record):
     sender: User
     receiver: User
     message: str
+
+
+class Ban(faust.Record):
+    blocker: User
+    banned: User

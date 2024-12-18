@@ -2,3 +2,4 @@
 .python-version
 .env
 *.pyc
+app/test-2-data
