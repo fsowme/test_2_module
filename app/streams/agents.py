@@ -1,18 +1,13 @@
 import logging
 
 from .handler import app
-from .topics import bans_topic, messages_topic
+from .topics import messages_in, messages_out
 
 logger = logging.getLogger(__name__)
 
 
-@app.agent(messages_topic)
+@app.agent(messages_in, sink=[messages_out])
 async def messages(stream):
     async for message in stream:
-        logger.debug('Received message: %s', message)
-
-
-@app.agent(bans_topic)
-async def bans(stream):
-    async for ban in stream:
-        logger.debug('Received ban: %s', ban)
+        logger.info('Received message: %s', message)
+        yield message
