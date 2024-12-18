@@ -10,7 +10,8 @@ dotenv.load_dotenv()
 class _Config:
     broker: str = os.environ['BROKER']
     store: str = os.environ['STORE']
-    messages_topics: str = os.environ['MESSAGES_TOPIC']
+    topic_messages_in: str = os.environ['TOPIC_MESSAGES_IN']
+    topic_messages_out: str = os.environ['TOPIC_MESSAGES_OUT']
     bans_topic: str = os.environ['BANS_TOPIC']
     default_serializer: str = 'json'
     default_app_name: str = 'test-2'
