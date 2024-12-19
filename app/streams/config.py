@@ -12,7 +12,7 @@ class _Config:
     store: str = os.environ['STORE']
     topic_messages_in: str = os.environ['TOPIC_MESSAGES_IN']
     topic_messages_out: str = os.environ['TOPIC_MESSAGES_OUT']
-    bans_topic: str = os.environ['BANS_TOPIC']
+    bans_topic: str = os.environ['TOPIC_BANS']
     default_serializer: str = 'json'
     default_app_name: str = 'test-2'
 

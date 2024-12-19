@@ -11,7 +11,7 @@ class User(faust.Record):
 
 class Message(faust.Record):
     sender: User
-    receiver: User
+    recipient: User
     message: str
 
 

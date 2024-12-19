@@ -1,3 +1,3 @@
 from .handler import app
 
-bans = app.Table('bans', default=list)
+bans = app.GlobalTable('bans', default=list)

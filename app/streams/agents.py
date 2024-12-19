@@ -1,26 +1,23 @@
 import logging
 
-from .handler import app
-from .tables import bans as table_bans
-from .topics import bans, messages_in, messages_out
+from . import handler, tables, topics
 
 logger = logging.getLogger(__name__)
 
 
-@app.agent(messages_in, sink=[messages_out])
+@handler.app.agent(topics.messages_in)
 async def messages(stream):
     async for message in stream:
-        logger.info('Received message: %s', message)
-        yield message
+        if message.sender.username in tables.bans[message.recipient.username]:
+            logger.info('Sender %s banned by %s', message.sender.username, message.recipient.username)
+            await topics.messages_out.send(value=message)
 
 
-@app.agent(bans)
+@handler.app.agent(topics.bans)
 async def bans(stream):
     async for message in stream:
-        logger.info('Received message: %s', message)
-        logger.info('1' + str(table_bans[message.blocker.username]))
-        banned_users = table_bans[message.blocker.username]
-        banned_users.append(message.banned.username)
-        table_bans[message.blocker.username] = banned_users
-        logger.info('2' + str(table_bans[message.blocker.username]))
-        yield message
+        banned_users = tables.bans[message.blocker.username]
+        if message.banned.username not in banned_users:
+            banned_users.append(message.banned.username)
+            tables.bans[message.blocker.username] = banned_users
+            logger.info('User "%s" banned by "%s"', message.banned.username, message.blocker.username)

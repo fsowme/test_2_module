@@ -26,7 +26,7 @@ producer = kafka.Producer(CONFIG)
 
 def fake_message(length: int) -> bytes:
     body = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
-    message = {'sender': {'username': 'from'}, 'receiver': {'username': 'to'}, 'message': body}
+    message = {'sender': {'username': 'from'}, 'recipient': {'username': 'to'}, 'message': body}
     return json.dumps(message).encode()
 
 
