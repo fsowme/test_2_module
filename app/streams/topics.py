@@ -1,8 +1,9 @@
+from . import schemas
 from .config import Config
 from .handler import app
-from .schemas import ban_schema, message_schema
 
-messages_in = app.topic(Config.topic_messages_in, schema=message_schema)
-messages_out = app.topic(Config.topic_messages_out, schema=message_schema)
+messages_in = app.topic(Config.topic_messages_in, schema=schemas.message)
+messages_out = app.topic(Config.topic_messages_out, schema=schemas.message)
 
-bans = app.topic(Config.bans_topic, schema=ban_schema)
+bans = app.topic(Config.topic_bans, schema=schemas.ban)
+obscene_words = app.topic(Config.topic_obscene_words, schema=schemas.obscene_word)

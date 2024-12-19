@@ -18,3 +18,7 @@ class Message(faust.Record):
 class Ban(faust.Record):
     blocker: User
     banned: User
+
+
+class ObsceneWord(faust.Record):
+    word: str

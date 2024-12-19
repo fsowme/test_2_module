@@ -1,9 +1,7 @@
+import argparse
 import json
 import logging
 import os
-import random
-import string
-import time
 
 import confluent_kafka as kafka
 import dotenv
@@ -18,29 +16,55 @@ CONFIG = {
     'acks': os.environ['ACKS'],
     'retries': int(os.environ['RETRIES']),
 }
-TOPIC_NAME = os.environ['TOPIC_MESSAGES_IN']
-QUEUE_FULL_TIMEOUT = os.environ.get('QUEUE_FULL_TIMEOUT', 0)
 
 producer = kafka.Producer(CONFIG)
 
 
-def fake_message(length: int) -> bytes:
-    body = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
-    message = {'sender': {'username': 'from'}, 'recipient': {'username': 'to'}, 'message': body}
-    return json.dumps(message).encode()
-
-
-while True:
-    message = fake_message(random.randint(3, 10))
-    logger.info(message)
-
+def produce(message: bytes, topic_name: str):
     try:
-        producer.produce(topic=TOPIC_NAME, value=message)
-    except BufferError as error:
-        logger.error('Internal producer message queue is full, error: %s', error)
-        time.sleep(QUEUE_FULL_TIMEOUT)
+        producer.produce(topic_name, value=message)
     except kafka.KafkaException as error:
         logger.error('Something went wrong, message:%s, error: %s', message, error)
         raise
+    producer.flush()
 
-    time.sleep(random.uniform(0.1, 2.0))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser('producer')
+
+    subparsers = parser.add_subparsers(dest='command', required=True)
+    subparsers.metavar = ''
+
+    ban_parser = subparsers.add_parser('ban', help='Ban a user')
+    ban_parser.add_argument('--blocker', required=True)
+    ban_parser.add_argument('--banned', required=True)
+
+    message_parser = subparsers.add_parser('message', help='Send message')
+    message_parser.add_argument('--sender', required=True)
+    message_parser.add_argument('--recipient', required=True)
+    message_parser.add_argument('message')
+
+    obscene_words_parser = subparsers.add_parser('obscene_words', help='Add obscene words')
+    obscene_words_parser.add_argument('word')
+
+    parsed = parser.parse_args()
+
+    if parsed.command == 'ban':
+        message = {
+            'blocker': {'username': parsed.blocker},
+            'banned': {'username': parsed.banned}
+        }
+        topic_name = os.environ['TOPIC_BANS']
+    elif parsed.command == 'message':
+        message = {
+            'sender': {'username': parsed.sender},
+            'recipient': {'username': parsed.recipient},
+            'message': parsed.message
+        }
+        topic_name = os.environ['TOPIC_MESSAGES_IN']
+    else:
+        message = {'word': parsed.word}
+        topic_name = os.environ['TOPIC_OBSCENE_WORDS']
+
+    raw = json.dumps(message).encode('utf-8')
+    produce(raw, topic_name)
