@@ -82,7 +82,7 @@ services:
       kafka-2:
         condition: service_healthy
     volumes:
-      - ./.data/:/data/app/test-2-data
+      - app:/data/app/test-2-data
 
   ui:
     image: provectuslabs/kafka-ui:v0.7.0
@@ -96,3 +96,4 @@ volumes:
   kafka_0_data:
   kafka_1_data:
   kafka_2_data:
+  app:
