@@ -12,15 +12,14 @@ logger = logging.getLogger(__name__)
 dotenv.load_dotenv()
 
 CONFIG = {
-    'bootstrap.servers': os.environ['BROKER'],
+    'bootstrap.servers': os.environ['BROKER_EXTERNAL_ADDR'],
     'acks': os.environ['ACKS'],
     'retries': int(os.environ['RETRIES']),
 }
 
-producer = kafka.Producer(CONFIG)
-
 
 def produce(message: bytes, topic_name: str):
+    producer = kafka.Producer(CONFIG)
     try:
         producer.produce(topic_name, value=message)
     except kafka.KafkaException as error:

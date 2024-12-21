@@ -14,6 +14,7 @@ async def messages(stream):
         if message.sender.username in tables.bans[message.recipient.username]:
             logger.info('Sender %s banned by %s', message.sender.username, message.recipient.username)
             continue
+        yield message
 
 
 @handler.app.agent(topics.censor, sink=[topics.messages_out])

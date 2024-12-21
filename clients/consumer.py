@@ -12,7 +12,7 @@ dotenv.load_dotenv()
 
 
 CONFIG = {
-    'bootstrap.servers': os.environ['BROKER'],
+    'bootstrap.servers': os.environ['BROKER_EXTERNAL_ADDR'],
     'group.id': os.environ['GROUP_ID'],
     'auto.offset.reset': 'earliest',
     'enable.auto.commit': True,
