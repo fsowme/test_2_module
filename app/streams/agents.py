@@ -19,8 +19,8 @@ async def messages(stream):
 @handler.app.agent(topics.censor, sink=[topics.messages_out])
 async def censor(stream):
     async for message in stream:
-        pattern = r'\b(' + '|'.join(tables.obscene_words.keys()) + r')\b'
-        message.message = re.sub(pattern, CENSORSHIP_MASK, message.message)
+        pattern = r'(' + '|'.join(tables.obscene_words.keys()) + r')'
+        message.message = re.sub(pattern, CENSORSHIP_MASK, message.message, flags=re.IGNORECASE)
         yield message
 
 
