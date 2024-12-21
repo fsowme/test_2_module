@@ -13,6 +13,7 @@ class _Config:
     topic_messages_in: str = os.environ['TOPIC_MESSAGES_IN']
     topic_messages_out: str = os.environ['TOPIC_MESSAGES_OUT']
     topic_bans: str = os.environ['TOPIC_BANS']
+    topic_censor: str = os.environ['TOPIC_CENSOR']
     topic_obscene_words: str = os.environ['TOPIC_OBSCENE_WORDS']
     default_serializer: str = 'json'
     default_app_name: str = 'test-2'

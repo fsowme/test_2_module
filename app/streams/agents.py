@@ -8,13 +8,17 @@ logger = logging.getLogger(__name__)
 CENSORSHIP_MASK = '<CENSORED>'
 
 
-@handler.app.agent(topics.messages_in, sink=[topics.messages_out])
+@handler.app.agent(topics.messages_in, sink=[topics.censor])
 async def messages(stream):
     async for message in stream:
         if message.sender.username in tables.bans[message.recipient.username]:
             logger.info('Sender %s banned by %s', message.sender.username, message.recipient.username)
             continue
 
+
+@handler.app.agent(topics.censor, sink=[topics.messages_out])
+async def censor(stream):
+    async for message in stream:
         pattern = r'\b(' + '|'.join(tables.obscene_words.keys()) + r')\b'
         message.message = re.sub(pattern, CENSORSHIP_MASK, message.message)
         yield message
